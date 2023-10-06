@@ -18,6 +18,7 @@ public class MainController {
 
         if (file != null) {
             System.out.println("File selected! --> " + file.getPath());
+            System.out.println("Success!");
         }
     }
 }
