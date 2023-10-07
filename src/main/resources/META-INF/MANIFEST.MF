@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Main-Class: com.example.cmpt365_tiff_reader.Main_1
+
