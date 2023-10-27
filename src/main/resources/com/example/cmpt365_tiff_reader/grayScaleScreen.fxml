@@ -5,12 +5,13 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: lightgreen;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cmpt365_tiff_reader.MainController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: lightgreen;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cmpt365_tiff_reader.MainController">
    <children>
       <Label layoutX="127.0" layoutY="57.0" text="Original Image" />
-      <Label layoutX="396.0" layoutY="57.0" text="Grayscale Image" />
+      <Label fx:id="newImageLabel" layoutX="396.0" layoutY="57.0" text="Grayscale Image" />
       <ImageView fx:id="originalImage" fitHeight="250.0" fitWidth="250.0" layoutX="42.0" layoutY="93.0" pickOnBounds="true" preserveRatio="true" />
       <ImageView fx:id="grayscaleImage" fitHeight="250.0" fitWidth="250.0" layoutX="315.0" layoutY="93.0" pickOnBounds="true" preserveRatio="true" />
       <Button layoutX="281.0" layoutY="22.0" mnemonicParsing="false" onAction="#grayscaleFileButton" text="Open File" />
+      <Button fx:id="brightnessButton" layoutX="414.0" layoutY="22.0" mnemonicParsing="false" onAction="#brightnessButtonClicked" text="Next" visible="false" />
    </children>
 </AnchorPane>
