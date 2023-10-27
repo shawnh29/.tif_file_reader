@@ -77,7 +77,17 @@ public class MainController {
         stage.setScene(scene);
         stage.show();
     }
+    public PixelBuffer makeViewableImg (BufferedImage buffImg) {
+        BufferedImage newImg = new BufferedImage(buffImg.getWidth(), buffImg.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
+        newImg.createGraphics().drawImage(buffImg, 0, 0, buffImg.getWidth(), buffImg.getHeight(), null);
 
+        int[] argb_arr = ((DataBufferInt) newImg.getRaster().getDataBuffer()).getData();
+        IntBuffer buff = IntBuffer.wrap(argb_arr);
+
+        PixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbPreInstance();
+        PixelBuffer<IntBuffer> pixelBuf = new PixelBuffer<>(newImg.getWidth(), newImg.getHeight(), buff, pixelFormat);
+        return pixelBuf;
+    }
     public void makeGreyscale(File file) throws IOException {
         BufferedImage buffImg = ImageIO.read(file);
         int width = buffImg.getWidth();
@@ -98,16 +108,7 @@ public class MainController {
                 buffImg.setRGB(x,y,pixel);
             }
         }
-        BufferedImage newImg = new BufferedImage(buffImg.getWidth(), buffImg.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
-        newImg.createGraphics().drawImage(buffImg, 0, 0, buffImg.getWidth(), buffImg.getHeight(), null);
-
-        int[] argb_arr = ((DataBufferInt) newImg.getRaster().getDataBuffer()).getData();
-        IntBuffer buff = IntBuffer.wrap(argb_arr);
-
-        PixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbPreInstance();
-        PixelBuffer<IntBuffer> pixelBuf = new PixelBuffer<>(newImg.getWidth(), newImg.getHeight(), buff, pixelFormat);
-
-        grayscaleImage.setImage(new WritableImage(pixelBuf));
+        grayscaleImage.setImage(new WritableImage(makeViewableImg(buffImg)));
     }
     @FXML
     public void grayscaleFileButton() throws IOException {
@@ -117,16 +118,8 @@ public class MainController {
 
         if (file != null) {
             BufferedImage buffImage = ImageIO.read(file);
-            BufferedImage newImg = new BufferedImage(buffImage.getWidth(), buffImage.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
-            newImg.createGraphics().drawImage(buffImage, 0, 0, buffImage.getWidth(), buffImage.getHeight(), null);
 
-            int[] argb_arr = ((DataBufferInt) newImg.getRaster().getDataBuffer()).getData();
-            IntBuffer buff = IntBuffer.wrap(argb_arr);
-
-            PixelFormat<IntBuffer> pixelFormat = PixelFormat.getIntArgbPreInstance();
-            PixelBuffer<IntBuffer> pixelBuf = new PixelBuffer<>(newImg.getWidth(), newImg.getHeight(), buff, pixelFormat);
-
-            originalImage.setImage(new WritableImage(pixelBuf));
+            originalImage.setImage(new WritableImage(makeViewableImg(buffImage)));
             makeGreyscale(file);
 
         }
