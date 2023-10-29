@@ -52,6 +52,7 @@ public class MainController {
     private File file;
     private BufferedImage grayscaleBuffImage;
     private BufferedImage originalBuffImage;
+    private BufferedImage originalGrayscaleBuffImage;
     @FXML
     public void openFileClicked() throws IOException {
         FileChooser fc = new FileChooser();
@@ -127,6 +128,7 @@ public class MainController {
         }
         newImage.setImage(new WritableImage(makeViewableImg(buffImg)));
         grayscaleBuffImage = buffImg;
+        originalGrayscaleBuffImage = buffImg;
         brightnessButton.setVisible(true);
         openFileButton.setVisible(false);
     }
@@ -189,51 +191,98 @@ public class MainController {
         brightnessButton.setVisible(false);
         ditherButton.setVisible(true);
     }
+
     @FXML
-    public void applyDithering() {
+    public void applyDithering() throws IOException {
         // WHY IS THE ORIGINAL IMAGE HERE A GRAYSCALE WITH 50% LOWER BRIGHTNESS
-        originalImage.setImage(new WritableImage(makeViewableImg(grayscaleBuffImage)));
+        BufferedImage buffImg = ImageIO.read(file);
+        int width = buffImg.getWidth();
+        int height = buffImg.getHeight();
+
+        for (int y=0; y<height; y++) {
+            for (int x=0; x<width; x++) {
+                int pixel = buffImg.getRGB(x,y);
+
+                int aVal = (pixel >> 24) & 0xff;
+                int rVal = (pixel >> 16) & 0xff;
+                int gVal = (pixel >> 8) & 0xff;
+                int bVal = pixel & 0xff;
+
+//                int averageVal = (rVal + gVal + bVal) / 3;
+                int averageVal = (int) (0.229 * rVal + 0.587 * gVal + 0.114 * bVal);
+                pixel = (aVal << 24) | (averageVal << 16) | (averageVal << 8) | averageVal;
+                buffImg.setRGB(x,y,pixel);
+            }
+        }
+        originalImage.setImage(new WritableImage(makeViewableImg(buffImg)));
         leftImageLabel.setText("Original grayscale image");
         newImageLabel.setText("Image after Ordered Dithering");
-        BufferedImage ditheredBuffImg = grayscaleBuffImage;
-        int height = ditheredBuffImg.getHeight();
-        int width = ditheredBuffImg.getWidth();
+        BufferedImage ditheredBuffImg = buffImg;
+        height = ditheredBuffImg.getHeight();
+        width = ditheredBuffImg.getWidth();
 
-        int[][] ditherMatrix = {{2,11,4,13},
-                                {15,6,16,8},
-                                {5,14,3,12},
-                                {16,9,16,7}};
-//        int[][] ditherMatrix = {{0,8,2,10,12,4,14,6},
-//                                {12,4,14,6,3,11,1,9},
-//                                {3,11,1,9,15,7,13,5},
-//                                {15,7,13,5,0,8,2,10},
-//                                {0,8,2,10,12,4,14,6},
-//                                {12,4,14,6,3,11,1,9},
-//                                {3,11,1,9,15,7,13,5},
-//                                {15,7,13,5,0,8,2,10}};
-        int aVal, rVal, gVal, bVal = 0;
-        // will be using 4x4 dithering matrix, so divide each pixel value by 16+1
+//        int[][] ditherMatrix = {{0,8,2,10},
+//                                {12,4,14,6},
+//                                {3,11,1,9},
+//                                {15,7,13,5}};
+//        int[][] ditherMatrix = {{0,32,8,40,2,34,10,42},
+//                                {48,16,56,24,50,18,58,26},
+//                                {12,44,4,46,14,46,6,38},
+//                                {60,28,52,20,62,30,54,22},
+//                                {3,35,11,43,1,33,9,41},
+//                                {51,19,59,27,49,17,57,25},
+//                                {15,47,7,39,13,45,5,37},
+//                                {63,31,55,23,61,29,53,21}};
+
+//        int ditherMatrix[][] = {
+//
+//            {63, 58, 50, 40, 41, 51, 59, 60, 64, 69, 77, 87, 86, 76, 68, 67},
+//            {57, 33, 27, 18, 19, 28, 34, 52, 70, 94, 100, 109, 108, 99, 93, 75},
+//            {49, 26, 13, 11, 12, 15, 29, 44, 78, 101, 114, 116, 115, 112, 98, 83},
+//            {39, 17, 4, 3, 2, 9, 20, 42, 87, 110, 123, 124, 125, 118, 107, 85},
+//            {38, 16, 5, 0, 1, 10, 21, 43, 89, 111, 122, 127, 126, 117, 106, 84},
+//            {48, 25, 8, 6, 7, 14, 30, 45, 79, 102, 119, 121, 120, 113, 97, 82},
+//            {56, 32, 24, 23, 22, 31, 35, 53, 71, 95, 103, 104, 105, 96, 92, 74},
+//            {62, 55, 47, 37, 36, 46, 54, 61, 65, 72, 80, 90, 91, 81, 73, 66},
+//            {64, 69, 77, 87, 86, 76, 68, 67, 63, 58, 50, 40, 41, 51, 59, 60},
+//            {70, 94, 100, 109, 108, 99, 93, 75, 57, 33, 27, 18, 19, 28, 34, 52},
+//            {78, 101, 114, 116, 115, 112, 98, 83, 49, 26, 13, 11, 12, 15, 29, 44},
+//            {87, 110, 123, 124, 125, 118, 107, 85, 39, 17, 4, 3, 2, 9, 20, 42},
+//            {89, 111, 122, 127, 126, 117, 106, 84, 38, 16, 5, 0, 1, 10, 21, 43},
+//            {79, 102, 119, 121, 120, 113, 97, 82, 48, 25, 8, 6, 7, 14, 30, 45},
+//            {71, 95, 103, 104, 105, 96, 92, 74, 56, 32, 24, 23, 22, 31, 35, 53},
+//            {65, 72, 80, 90, 91, 81, 73, 66, 62, 55, 47, 37, 36, 46, 54, 61},
+//        };
+        int[][] ditherMatrix = {
+                {56, 23, 47, 34, 15, 2, 41, 63, 77, 9},
+                {31, 72, 84, 50, 37, 12, 30, 58, 61, 3},
+                {46, 14, 28, 85, 69, 20, 6, 79, 5, 96},
+                {71, 11, 87, 1, 65, 35, 53, 95, 64, 42},
+                {74, 25, 68, 48, 13, 76, 70, 24, 78, 33},
+                {8, 86, 21, 67, 75, 7, 16, 27, 91, 19},
+                {80, 17, 10, 44, 60, 88, 59, 38, 45, 52},
+                {32, 66, 22, 26, 55, 89, 18, 49, 90, 36},
+                {81, 62, 54, 29, 73, 4, 40, 51, 94, 82},
+                {93, 43, 83, 97, 70, 98, 6, 64, 76, 25}
+        };
+
+        // will be using 10x10 dithering matrix, so divide each pixel value by 100
         for (int x=0; x<width; x++) {
             for (int y=0; y<height; y++) {
-                int color = new Color(ditheredBuffImg.getRGB(x,y)).getBlue();
-                if (x == 0 && y ==0) {
-                    System.out.println("Color: " + color);
-                }
-                int i = x % 4;
-                int j = y % 4;
-                int intensity = color / 17;
+                int pixel = buffImg.getRGB(x,y);
+
+                int aVal = (pixel >> 24) & 0xff;
+                int rVal = (pixel >> 16) & 0xff;
+
+                int i = x % ditherMatrix.length;
+                int j = y % ditherMatrix.length;
+                int intensity = rVal / (256/100);
                 if (intensity < ditherMatrix[i][j]) {
-                    aVal = 0;
                     rVal = 0;
-                    gVal = 0;
-                    bVal = 0;
                 } else {
-                    aVal = 255;
                     rVal = 255;
-                    gVal = 255;
-                    bVal = 255;
                 }
-                int pixel = (aVal << 24) | (rVal << 16) | (gVal << 8) | bVal;
+                pixel = (aVal << 24) | (rVal << 16) | (rVal << 8) | rVal;
                 ditheredBuffImg.setRGB(x,y,pixel);
             }
         }

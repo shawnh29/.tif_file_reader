@@ -5,13 +5,13 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: lightgreen;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cmpt365_tiff_reader.MainController">
+<AnchorPane prefHeight="600.0" prefWidth="900.0" style="-fx-background-color: lightgreen;" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.cmpt365_tiff_reader.MainController">
    <children>
-      <Label fx:id="leftImageLabel" layoutX="127.0" layoutY="57.0" text="Original Image" />
-      <Label fx:id="newImageLabel" layoutX="396.0" layoutY="57.0" text="Grayscale Image" />
-      <ImageView fx:id="originalImage" fitHeight="250.0" fitWidth="250.0" layoutX="42.0" layoutY="93.0" pickOnBounds="true" preserveRatio="true" />
-      <ImageView fx:id="newImage" fitHeight="250.0" fitWidth="250.0" layoutX="315.0" layoutY="93.0" pickOnBounds="true" preserveRatio="true" />
-      <Button fx:id="openFileButton" layoutX="281.0" layoutY="21.0" mnemonicParsing="false" onAction="#grayscaleFileButton" text="Open File" />
+      <Label fx:id="leftImageLabel" layoutX="145.0" layoutY="57.0" text="Original Image" />
+      <Label fx:id="newImageLabel" layoutX="602.0" layoutY="57.0" text="Grayscale Image" />
+      <ImageView fx:id="originalImage" fitHeight="380.0" fitWidth="380.0" layoutX="42.0" layoutY="93.0" pickOnBounds="true" preserveRatio="true" />
+      <ImageView fx:id="newImage" fitHeight="380.0" fitWidth="380.0" layoutX="456.0" layoutY="93.0" pickOnBounds="true" preserveRatio="true" />
+      <Button fx:id="openFileButton" layoutX="389.0" layoutY="22.0" mnemonicParsing="false" onAction="#grayscaleFileButton" text="Open File" />
       <Button fx:id="brightnessButton" layoutX="109.0" layoutY="21.0" mnemonicParsing="false" onAction="#brightnessButtonClicked" prefHeight="26.0" prefWidth="115.0" text="Reduce Brightness" visible="false" />
       <Button fx:id="ditherButton" layoutX="423.0" layoutY="22.0" mnemonicParsing="false" onAction="#applyDithering" text="Dithering" visible="false" />
       <Button fx:id="autoLevelButton" layoutX="351.0" layoutY="22.0" mnemonicParsing="false" onAction="#autoLevelClicked" text="Auto level" visible="false" />
