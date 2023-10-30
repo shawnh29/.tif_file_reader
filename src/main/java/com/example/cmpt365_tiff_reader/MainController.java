@@ -296,5 +296,70 @@ public class MainController {
         leftImageLabel.setText("Original Image");
         newImageLabel.setText("After applying auto level");
         // do auto level to image, then set new image to that
+        int maxR = -1000, maxG = -1000, maxB = -1000;
+        int minR = 1000, minG = 1000, minB = 1000;
+        int width = originalBuffImage.getWidth();
+        int height = originalBuffImage.getHeight();
+
+        for (int y=0; y<height; y++) {
+            for (int x=0; x<width; x++) {
+                int pixel = originalBuffImage.getRGB(x,y);
+                int rVal = (pixel >> 16) & 0xff;
+                int gVal = (pixel >> 8) & 0xff;
+                int bVal = pixel & 0xff;
+
+                maxR = Math.max(rVal, maxR);
+                maxG = Math.max(gVal, maxG);
+                maxB = Math.max(bVal, maxB);
+
+                minR = Math.min(rVal, minR);
+                minG = Math.min(gVal, minG);
+                minB = Math.min(bVal, minB);
+            }
+        }
+        System.out.println("MaxR: " + maxR + " MaxG: " + maxG + " MaxB: " + maxB);
+        System.out.println("MinR: " + minR + " MinG: " + minG + " MinB: " + minB);
+
+        int numPixels = height*width;
+        for (int y=0; y<height; y++) {
+            for (int x=0; x<width; x++) {
+                int pixel = originalBuffImage.getRGB(x,y);
+                int aVal = (pixel >> 24) & 0xff;
+                int rVal = (pixel >> 16) & 0xff;
+                int gVal = (pixel >> 8) & 0xff;
+                int bVal = pixel & 0xff;
+
+                float newR = ((float) rVal / (maxR - minR)) * 255;
+                float newG = ((float) gVal / (maxG - minG)) * 255;
+                float newB = ((float) bVal / (maxB - minB)) * 255;
+
+//                double newR = ((rVal - minR) * (255.0 / (maxR - minR)));
+//                double newG = ((gVal - minG) * (255.0 / (maxG - minG)));
+//                double newB = ((bVal - minB) * (255.0 / (maxB - minB)));
+
+                if (newR > 255) {
+                    newR = 255;
+                }
+                if (newG > 255) {
+                    newG = 255;
+                }
+                if (newB > 255) {
+                    newB = 255;
+                }
+                rVal = Math.round(newR);
+                gVal = Math.round(newG);
+                bVal = Math.round(newB);
+
+//                rVal = (int) ((float)rVal / (maxR - minR)) * 255;
+//                gVal = (int) ((float)gVal / (maxG - minG)) * 255;
+//                bVal = (int) ((float)bVal / (maxB - minB)) * 255;
+                if (x == 0 && y == 0) {
+                    System.out.println(rVal + " " + gVal + " " + bVal);
+                }
+                pixel = (aVal << 24) | (rVal << 16) | (gVal << 8) | bVal;
+                originalBuffImage.setRGB(x,y,pixel);
+            }
+        }
+        newImage.setImage(new WritableImage(makeViewableImg(originalBuffImage)));
     }
 }
