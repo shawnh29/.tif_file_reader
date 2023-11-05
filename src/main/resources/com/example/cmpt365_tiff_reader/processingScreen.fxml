@@ -15,5 +15,6 @@
       <Button fx:id="brightnessButton" layoutX="109.0" layoutY="21.0" mnemonicParsing="false" onAction="#brightnessButtonClicked" prefHeight="26.0" prefWidth="115.0" text="Reduce Brightness" visible="false" />
       <Button fx:id="ditherButton" layoutX="423.0" layoutY="22.0" mnemonicParsing="false" onAction="#applyDithering" text="Dithering" visible="false" />
       <Button fx:id="autoLevelButton" layoutX="351.0" layoutY="22.0" mnemonicParsing="false" onAction="#autoLevelClicked" text="Auto level" visible="false" />
+      <Button fx:id="finalExitButton" layoutX="421.0" layoutY="477.0" mnemonicParsing="false" onAction="#exitButtonClicked" text="Exit" visible="false" />
    </children>
 </AnchorPane>

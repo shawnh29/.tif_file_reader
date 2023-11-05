@@ -1,5 +1,6 @@
 package com.example.cmpt365_tiff_reader;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,7 +12,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.DataBufferInt;
 import java.io.File;
 import java.awt.image.BufferedImage;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.nio.IntBuffer;
 
 public class MainController {
-
     private Parent root;
     private Stage stage;
     private Scene scene;
@@ -27,6 +26,8 @@ public class MainController {
     private ImageView image;
     @FXML
     private Button exitButton;
+    @FXML
+    private Button finalExitButton;
     @FXML
     private Button brightnessButton;
     @FXML
@@ -52,7 +53,6 @@ public class MainController {
     private File file;
     private BufferedImage grayscaleBuffImage;
     private BufferedImage originalBuffImage;
-    private BufferedImage originalGrayscaleBuffImage;
     @FXML
     public void openFileClicked() throws IOException {
         FileChooser fc = new FileChooser();
@@ -61,7 +61,6 @@ public class MainController {
         exitButton.setVisible(true);
 
         if (file != null) {
-            System.out.println("File selected! --> " + file.getPath());
             BufferedImage buffImage = ImageIO.read(file);
             originalBuffImage = buffImage;
             BufferedImage newImg = new BufferedImage(buffImage.getWidth(), buffImage.getHeight(), BufferedImage.TYPE_INT_ARGB_PRE);
@@ -83,15 +82,14 @@ public class MainController {
     }
     @FXML
     public void exitButtonClicked() {
-        Stage stage = (Stage) exitButton.getScene().getWindow();
-        stage.close();
+        Platform.exit();
     }
     @FXML
     public void grayScaleButtonClicked() throws IOException {
         root = FXMLLoader.load(getClass().getResource("processingScreen.fxml"));
         stage = (Stage) goToGrayScaleButton.getScene().getWindow();
         scene = new Scene(root);
-        stage.setTitle("Processing Results");
+        stage.setTitle("Image Processing");
         stage.setScene(scene);
         stage.show();
     }
@@ -128,7 +126,6 @@ public class MainController {
         }
         newImage.setImage(new WritableImage(makeViewableImg(buffImg)));
         grayscaleBuffImage = buffImg;
-        originalGrayscaleBuffImage = buffImg;
         brightnessButton.setVisible(true);
         openFileButton.setVisible(false);
     }
@@ -194,7 +191,6 @@ public class MainController {
 
     @FXML
     public void applyDithering() throws IOException {
-        // WHY IS THE ORIGINAL IMAGE HERE A GRAYSCALE WITH 50% LOWER BRIGHTNESS
         BufferedImage buffImg = ImageIO.read(file);
         int width = buffImg.getWidth();
         int height = buffImg.getHeight();
@@ -208,9 +204,8 @@ public class MainController {
                 int gVal = (pixel >> 8) & 0xff;
                 int bVal = pixel & 0xff;
 
-//                int averageVal = (rVal + gVal + bVal) / 3;
-                int averageVal = (int) (0.229 * rVal + 0.587 * gVal + 0.114 * bVal);
-                pixel = (aVal << 24) | (averageVal << 16) | (averageVal << 8) | averageVal;
+                int gray = (int) (0.229 * rVal + 0.587 * gVal + 0.114 * bVal);
+                pixel = (aVal << 24) | (gray << 16) | (gray << 8) | gray;
                 buffImg.setRGB(x,y,pixel);
             }
         }
@@ -221,43 +216,11 @@ public class MainController {
         height = ditheredBuffImg.getHeight();
         width = ditheredBuffImg.getWidth();
 
-//        int[][] ditherMatrix = {{0,8,2,10},
-//                                {12,4,14,6},
-//                                {3,11,1,9},
-//                                {15,7,13,5}};
-//        int[][] ditherMatrix = {{0,32,8,40,2,34,10,42},
-//                                {48,16,56,24,50,18,58,26},
-//                                {12,44,4,46,14,46,6,38},
-//                                {60,28,52,20,62,30,54,22},
-//                                {3,35,11,43,1,33,9,41},
-//                                {51,19,59,27,49,17,57,25},
-//                                {15,47,7,39,13,45,5,37},
-//                                {63,31,55,23,61,29,53,21}};
-
-//        int ditherMatrix[][] = {
-//
-//            {63, 58, 50, 40, 41, 51, 59, 60, 64, 69, 77, 87, 86, 76, 68, 67},
-//            {57, 33, 27, 18, 19, 28, 34, 52, 70, 94, 100, 109, 108, 99, 93, 75},
-//            {49, 26, 13, 11, 12, 15, 29, 44, 78, 101, 114, 116, 115, 112, 98, 83},
-//            {39, 17, 4, 3, 2, 9, 20, 42, 87, 110, 123, 124, 125, 118, 107, 85},
-//            {38, 16, 5, 0, 1, 10, 21, 43, 89, 111, 122, 127, 126, 117, 106, 84},
-//            {48, 25, 8, 6, 7, 14, 30, 45, 79, 102, 119, 121, 120, 113, 97, 82},
-//            {56, 32, 24, 23, 22, 31, 35, 53, 71, 95, 103, 104, 105, 96, 92, 74},
-//            {62, 55, 47, 37, 36, 46, 54, 61, 65, 72, 80, 90, 91, 81, 73, 66},
-//            {64, 69, 77, 87, 86, 76, 68, 67, 63, 58, 50, 40, 41, 51, 59, 60},
-//            {70, 94, 100, 109, 108, 99, 93, 75, 57, 33, 27, 18, 19, 28, 34, 52},
-//            {78, 101, 114, 116, 115, 112, 98, 83, 49, 26, 13, 11, 12, 15, 29, 44},
-//            {87, 110, 123, 124, 125, 118, 107, 85, 39, 17, 4, 3, 2, 9, 20, 42},
-//            {89, 111, 122, 127, 126, 117, 106, 84, 38, 16, 5, 0, 1, 10, 21, 43},
-//            {79, 102, 119, 121, 120, 113, 97, 82, 48, 25, 8, 6, 7, 14, 30, 45},
-//            {71, 95, 103, 104, 105, 96, 92, 74, 56, 32, 24, 23, 22, 31, 35, 53},
-//            {65, 72, 80, 90, 91, 81, 73, 66, 62, 55, 47, 37, 36, 46, 54, 61},
-//        };
         int[][] ditherMatrix = {
-                {56, 23, 47, 34, 15, 2, 41, 63, 77, 9},
+                {56, 23, 47, 34, 15, 12, 41, 63, 77, 9},
                 {31, 72, 84, 50, 37, 12, 30, 58, 61, 3},
                 {46, 14, 28, 85, 69, 20, 6, 79, 5, 96},
-                {71, 11, 87, 1, 65, 35, 53, 95, 64, 42},
+                {71, 11, 87, 40, 65, 35, 53, 95, 64, 42},
                 {74, 25, 68, 48, 13, 76, 70, 24, 78, 33},
                 {8, 86, 21, 67, 75, 7, 16, 27, 91, 19},
                 {80, 17, 10, 44, 60, 88, 59, 38, 45, 52},
@@ -265,7 +228,6 @@ public class MainController {
                 {81, 62, 54, 29, 73, 4, 40, 51, 94, 82},
                 {93, 43, 83, 97, 70, 98, 6, 64, 76, 25}
         };
-
         // will be using 10x10 dithering matrix, so divide each pixel value by 100
         for (int x=0; x<width; x++) {
             for (int y=0; y<height; y++) {
@@ -291,36 +253,47 @@ public class MainController {
         autoLevelButton.setVisible(true);
     }
     @FXML
-    public void autoLevelClicked() {
+    public void autoLevelClicked() throws IOException {
         originalImage.setImage(new WritableImage(makeViewableImg(originalBuffImage)));
         leftImageLabel.setText("Original Image");
         newImageLabel.setText("After applying auto level");
-        // do auto level to image, then set new image to that
+        autoLevelButton.setVisible(false);
+        finalExitButton.setVisible(true);
+        // first get a fresh image and turn it to grayscale
+        BufferedImage grayUseBufImg = ImageIO.read(file);
+        int gX = grayUseBufImg.getWidth();
+        int gY = grayUseBufImg.getHeight();
         int maxR = -1000, maxG = -1000, maxB = -1000;
         int minR = 1000, minG = 1000, minB = 1000;
-        int width = originalBuffImage.getWidth();
-        int height = originalBuffImage.getHeight();
+        for (int y=0; y<gY; y++) {
+            for (int x=0; x<gX; x++) {
+                int pixel = grayUseBufImg.getRGB(x,y);
+                int a = (pixel >> 24) & 0xff;
+                int r = (pixel >> 16) & 0xff;
+                int g = (pixel >> 8) & 0xff;
+                int b = pixel & 0xff;
 
-        for (int y=0; y<height; y++) {
-            for (int x=0; x<width; x++) {
-                int pixel = originalBuffImage.getRGB(x,y);
-                int rVal = (pixel >> 16) & 0xff;
-                int gVal = (pixel >> 8) & 0xff;
-                int bVal = pixel & 0xff;
+                int gray = (int) ((int) 0.229 * r + 0.587 * g + 0.114 * b);
+                pixel = (a << 24) | (gray << 16) | (gray << 8) | gray;
+                grayUseBufImg.setRGB(x,y,pixel);
 
-                maxR = Math.max(rVal, maxR);
-                maxG = Math.max(gVal, maxG);
-                maxB = Math.max(bVal, maxB);
+                // after making it grayscale, extract the max value of each RGB channel
+                int newR = (pixel >> 16) & 0xff;
+                int newG = (pixel >> 8) & 0xff;
+                int newB = pixel & 0xff;
 
-                minR = Math.min(rVal, minR);
-                minG = Math.min(gVal, minG);
-                minB = Math.min(bVal, minB);
+                maxR = Math.max(newR, maxR);
+                maxG = Math.max(newG, maxG);
+                maxB = Math.max(newB, maxB);
+
+                minR = Math.min(newR, minR);
+                minG = Math.min(newG, minG);
+                minB = Math.min(newB, minB);
             }
         }
-        System.out.println("MaxR: " + maxR + " MaxG: " + maxG + " MaxB: " + maxB);
-        System.out.println("MinR: " + minR + " MinG: " + minG + " MinB: " + minB);
 
-        int numPixels = height*width;
+        int width = grayUseBufImg.getWidth();
+        int height = grayUseBufImg.getHeight();
         for (int y=0; y<height; y++) {
             for (int x=0; x<width; x++) {
                 int pixel = originalBuffImage.getRGB(x,y);
@@ -329,14 +302,17 @@ public class MainController {
                 int gVal = (pixel >> 8) & 0xff;
                 int bVal = pixel & 0xff;
 
-                float newR = ((float) rVal / (maxR - minR)) * 255;
-                float newG = ((float) gVal / (maxG - minG)) * 255;
-                float newB = ((float) bVal / (maxB - minB)) * 255;
+                // calculating the scaling factor, this will stretch the pixel values to the full [0,255] range
+                double rScale = 255.0 / (maxR - minR);
+                double gScale = 255.0 / (maxR - minR);
+                double bScale = 255.0 / (maxR - minR);
 
-//                double newR = ((rVal - minR) * (255.0 / (maxR - minR)));
-//                double newG = ((gVal - minG) * (255.0 / (maxG - minG)));
-//                double newB = ((bVal - minB) * (255.0 / (maxB - minB)));
+                // the new RGB values
+                double newR = (rVal - minR) * rScale;
+                double newG = (gVal - minG) * gScale;
+                double newB = (bVal - minB) * bScale;
 
+                // after doing the calculations, the values may exceed 255, in that case, bound it by 255
                 if (newR > 255) {
                     newR = 255;
                 }
@@ -346,16 +322,10 @@ public class MainController {
                 if (newB > 255) {
                     newB = 255;
                 }
-                rVal = Math.round(newR);
-                gVal = Math.round(newG);
-                bVal = Math.round(newB);
+                rVal = (int) Math.round(newR);
+                gVal = (int) Math.round(newG);
+                bVal = (int) Math.round(newB);
 
-//                rVal = (int) ((float)rVal / (maxR - minR)) * 255;
-//                gVal = (int) ((float)gVal / (maxG - minG)) * 255;
-//                bVal = (int) ((float)bVal / (maxB - minB)) * 255;
-                if (x == 0 && y == 0) {
-                    System.out.println(rVal + " " + gVal + " " + bVal);
-                }
                 pixel = (aVal << 24) | (rVal << 16) | (gVal << 8) | bVal;
                 originalBuffImage.setRGB(x,y,pixel);
             }
